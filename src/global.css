@@ -23,3 +23,20 @@ button{
 input{
   font-family:inherit;
 }
+.page-center {
+  min-height: 100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:15px;
+}
+
+.page-center h1{
+  color:#2d6a4f;
+}
+
+.page-center a{
+  color:#2d6a4f;
+  font-weight:bold;
+}
