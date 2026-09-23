@@ -6,7 +6,10 @@ function TaskList({ tasks, onDelete, onToggle }) {
   return (
     <div className="task-list">
       {tasks.map((task) => (
-        <div className="task-card" key={task.id}>
+        <div
+  className={`task-card ${task.completed ? "completed" : ""}`}
+  key={task.id}
+>
           <h3>{task.title}</h3>
 
           <p>{task.subject}</p>
