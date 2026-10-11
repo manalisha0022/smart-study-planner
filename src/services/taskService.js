@@ -1,5 +1,5 @@
-import { db } from "../firebase/firebase";
 
+import { db } from "../firebase/firebase";
 import {
   collection,
   addDoc,
@@ -14,16 +14,13 @@ import {
 const taskCollection = collection(db, "tasks");
 
 // CREATE
-
 export const addTask = (task) => {
   return addDoc(taskCollection, task);
 };
 
 // READ (Current User Only)
-
 export const getTasks = async (userId) => {
   const q = query(taskCollection, where("userId", "==", userId));
-
   const snapshot = await getDocs(q);
 
   return snapshot.docs.map((doc) => ({
@@ -33,15 +30,22 @@ export const getTasks = async (userId) => {
 };
 
 // DELETE
-
 export const deleteTask = (id) => {
   return deleteDoc(doc(db, "tasks", id));
 };
 
 // UPDATE (Complete)
-
 export const toggleTaskStatus = (id, completed) => {
   return updateDoc(doc(db, "tasks", id), {
     completed
+  });
+};
+
+// UPDATE (Edit Task Details)
+export const updateTask = (id, updatedData) => {
+  return updateDoc(doc(db, "tasks", id), {
+    title: updatedData.title,
+    subject: updatedData.subject,
+    priority: updatedData.priority
   });
 };

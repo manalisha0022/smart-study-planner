@@ -1,4 +1,5 @@
-function TaskList({ tasks, onDelete, onToggle }) {
+
+function TaskList({ tasks, onDelete, onToggle, onEdit }) {
   if (tasks.length === 0) {
     return <p>No study tasks yet.</p>;
   }
@@ -7,9 +8,9 @@ function TaskList({ tasks, onDelete, onToggle }) {
     <div className="task-list">
       {tasks.map((task) => (
         <div
-  className={`task-card ${task.completed ? "completed" : ""}`}
-  key={task.id}
->
+          className={`task-card ${task.completed ? "completed" : ""}`}
+          key={task.id}
+        >
           <h3>{task.title}</h3>
 
           <p>{task.subject}</p>
@@ -21,6 +22,10 @@ function TaskList({ tasks, onDelete, onToggle }) {
           <div className="task-actions">
             <button onClick={() => onToggle(task)}>
               {task.completed ? "✅ Completed" : "Mark Complete"}
+            </button>
+
+            <button onClick={() => onEdit(task)}>
+              Edit
             </button>
 
             <button

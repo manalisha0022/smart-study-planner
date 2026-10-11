@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -7,6 +8,7 @@ import {
   getTasks,
   deleteTask,
   toggleTaskStatus,
+  updateTask,
 } from "../services/taskService";
 
 import TaskForm from "../components/TaskForm";
@@ -18,13 +20,22 @@ function Dashboard() {
   const navigate = useNavigate();
 
   const [tasks, setTasks] = useState([]);
+  const [editingTask, setEditingTask] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editSubject, setEditSubject] = useState("");
+  const [editPriority, setEditPriority] = useState("Medium");
+  const [editError, setEditError] = useState("");
 
   // Load tasks when dashboard opens
   useEffect(() => {
-    loadTasks();
-  }, []);
+    if (currentUser?.uid) {
+      loadTasks();
+    }
+  }, [currentUser?.uid]);
 
   const loadTasks = async () => {
+    if (!currentUser?.uid) return;
+
     const userTasks = await getTasks(currentUser.uid);
     setTasks(userTasks);
   };
@@ -36,19 +47,56 @@ function Dashboard() {
       userId: currentUser.uid,
     });
 
-    loadTasks();
+    await loadTasks();
   };
 
   // Delete task
   const handleDeleteTask = async (id) => {
     await deleteTask(id);
-    loadTasks();
+    await loadTasks();
   };
 
   // Complete task
   const handleToggleTask = async (task) => {
     await toggleTaskStatus(task.id, !task.completed);
-    loadTasks();
+    await loadTasks();
+  };
+
+  // Open edit form
+  const handleEditTask = (task) => {
+    setEditingTask(task);
+    setEditTitle(task.title || "");
+    setEditSubject(task.subject || "");
+    setEditPriority(task.priority || "Medium");
+    setEditError("");
+  };
+
+  // Save edited task
+  const handleSaveEdit = async (event) => {
+    event.preventDefault();
+
+    const title = editTitle.trim();
+    const subject = editSubject.trim();
+
+    if (!title || !subject) {
+      setEditError("Please enter both a task title and subject.");
+      return;
+    }
+
+    try {
+      await updateTask(editingTask.id, {
+        title,
+        subject,
+        priority: editPriority,
+      });
+
+      setEditingTask(null);
+      setEditError("");
+      await loadTasks();
+    } catch (error) {
+      console.error("Error updating task:", error);
+      setEditError("Could not update the task. Please try again.");
+    }
   };
 
   // Logout
@@ -69,7 +117,6 @@ function Dashboard() {
   return (
     <div className="dashboard">
       {/* Sidebar */}
-
       <aside className="sidebar">
         <h2>🎓 Study Planner</h2>
 
@@ -81,7 +128,6 @@ function Dashboard() {
       </aside>
 
       {/* Main */}
-
       <main className="main-content">
         <div className="header">
           <div>
@@ -95,15 +141,12 @@ function Dashboard() {
         </div>
 
         {/* Welcome */}
-
         <div className="welcome-card">
           <h2>Welcome Back 👋</h2>
-
           <p>Track your assignments and study progress in one place.</p>
         </div>
 
         {/* Statistics */}
-
         <div className="stats-grid">
           <div className="stat-card">
             <h3>{tasks.length}</h3>
@@ -127,15 +170,66 @@ function Dashboard() {
         </div>
 
         {/* Add Task */}
-
         <TaskForm onAddTask={handleAddTask} />
 
-        {/* Task List */}
+        {/* Edit Task Form */}
+        {editingTask && (
+          <div className="task-form">
+            <h2>Edit Study Task</h2>
 
+            <form onSubmit={handleSaveEdit}>
+              <label htmlFor="edit-title">Task Title</label>
+              <input
+                id="edit-title"
+                type="text"
+                value={editTitle}
+                onChange={(event) => setEditTitle(event.target.value)}
+                placeholder="Enter task title"
+              />
+
+              <label htmlFor="edit-subject">Subject</label>
+              <input
+                id="edit-subject"
+                type="text"
+                value={editSubject}
+                onChange={(event) => setEditSubject(event.target.value)}
+                placeholder="Enter subject"
+              />
+
+              <label htmlFor="edit-priority">Priority</label>
+              <select
+                id="edit-priority"
+                value={editPriority}
+                onChange={(event) => setEditPriority(event.target.value)}
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+
+              {editError && <p role="alert">{editError}</p>}
+
+              <button type="submit">Save Changes</button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingTask(null);
+                  setEditError("");
+                }}
+              >
+                Cancel
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Task List */}
         <TaskList
           tasks={tasks}
           onDelete={handleDeleteTask}
           onToggle={handleToggleTask}
+          onEdit={handleEditTask}
         />
       </main>
     </div>
