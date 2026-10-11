@@ -14,6 +14,28 @@ function TaskList({ tasks, onDelete, onToggle, onEdit }) {
           <h3>{task.title}</h3>
 
           <p>{task.subject}</p>
+          
+
+{task.dueDate && (
+  <p className="task-due-date">
+    📅 Due: {task.dueDate}
+  </p>
+)}
+
+{task.dueDate &&
+  !task.completed &&
+  task.dueDate <
+    `${new Date().getFullYear()}-${String(
+      new Date().getMonth() + 1
+    ).padStart(2, "0")}-${String(
+      new Date().getDate()
+    ).padStart(2, "0")}` && (
+    <p className="overdue-label">
+      ⚠️ Overdue
+    </p>
+  )}
+
+
 
           <span className={`priority ${task.priority.toLowerCase()}`}>
             {task.priority}

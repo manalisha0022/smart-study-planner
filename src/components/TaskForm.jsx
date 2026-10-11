@@ -1,25 +1,29 @@
+
 import { useState } from "react";
 
 function TaskForm({ onAddTask }) {
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
   const [priority, setPriority] = useState("Medium");
+  const [dueDate, setDueDate] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!title || !subject) return;
+    if (!title.trim() || !subject.trim()) return;
 
     onAddTask({
-      title,
-      subject,
+      title: title.trim(),
+      subject: subject.trim(),
       priority,
+      dueDate,
       completed: false,
     });
 
     setTitle("");
     setSubject("");
     setPriority("Medium");
+    setDueDate("");
   };
 
   return (
@@ -31,6 +35,7 @@ function TaskForm({ onAddTask }) {
         placeholder="Task title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        required
       />
 
       <input
@@ -38,18 +43,27 @@ function TaskForm({ onAddTask }) {
         placeholder="Subject"
         value={subject}
         onChange={(e) => setSubject(e.target.value)}
+        required
       />
 
       <select
         value={priority}
         onChange={(e) => setPriority(e.target.value)}
       >
-        <option>High</option>
-        <option>Medium</option>
-        <option>Low</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
       </select>
 
-      <button>Add Task</button>
+      <label htmlFor="task-due-date">Due Date</label>
+      <input
+        id="task-due-date"
+        type="date"
+        value={dueDate}
+        onChange={(e) => setDueDate(e.target.value)}
+      />
+
+      <button type="submit">Add Task</button>
     </form>
   );
 }

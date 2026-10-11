@@ -20,6 +20,9 @@ function Dashboard() {
   const navigate = useNavigate();
 
   const [tasks, setTasks] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [priorityFilter, setPriorityFilter] = useState("All");
   const [editingTask, setEditingTask] = useState(null);
   const [editTitle, setEditTitle] = useState("");
   const [editSubject, setEditSubject] = useState("");
@@ -104,7 +107,27 @@ function Dashboard() {
     await logoutUser();
     navigate("/login");
   };
+// Search tasks by title or subject
 
+
+const filteredTasks = tasks.filter((task) => {
+  const search = searchTerm.toLowerCase().trim();
+
+  const matchesSearch =
+    (task.title || "").toLowerCase().includes(search) ||
+    (task.subject || "").toLowerCase().includes(search);
+
+  const matchesStatus =
+    statusFilter === "All" ||
+    (statusFilter === "Pending" && !task.completed) ||
+    (statusFilter === "Completed" && task.completed);
+
+  const matchesPriority =
+    priorityFilter === "All" ||
+    task.priority === priorityFilter;
+
+  return matchesSearch && matchesStatus && matchesPriority;
+});
   // Dashboard statistics
   const completedTasks = tasks.filter((task) => task.completed).length;
 
@@ -224,13 +247,55 @@ function Dashboard() {
           </div>
         )}
 
-        {/* Task List */}
-        <TaskList
-          tasks={tasks}
-          onDelete={handleDeleteTask}
-          onToggle={handleToggleTask}
-          onEdit={handleEditTask}
-        />
+{/* Search Tasks */}
+<div className="task-search">
+  <input
+    type="text"
+    placeholder="Search by task title or subject..."
+    value={searchTerm}
+    onChange={(event) => setSearchTerm(event.target.value)}
+  />
+</div>
+
+{/* Filter by Status */}
+<div className="task-filter">
+  <label htmlFor="status-filter">Filter by status:</label>
+
+  <select
+    id="status-filter"
+    value={statusFilter}
+    onChange={(event) => setStatusFilter(event.target.value)}
+  >
+    <option value="All">All Tasks</option>
+    <option value="Pending">Pending</option>
+    <option value="Completed">Completed</option>
+  </select>
+</div>
+
+{/* Filter by Priority */}
+<div className="task-filter">
+  <label htmlFor="priority-filter">Filter by priority:</label>
+
+  <select
+    id="priority-filter"
+    value={priorityFilter}
+    onChange={(event) => setPriorityFilter(event.target.value)}
+  >
+    <option value="All">All Priorities</option>
+    <option value="High">High</option>
+    <option value="Medium">Medium</option>
+    <option value="Low">Low</option>
+  </select>
+</div>
+
+
+{/* Task List */}
+<TaskList
+  tasks={filteredTasks}
+  onDelete={handleDeleteTask}
+  onToggle={handleToggleTask}
+  onEdit={handleEditTask}
+/>
       </main>
     </div>
   );
