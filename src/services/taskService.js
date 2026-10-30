@@ -42,10 +42,13 @@ export const toggleTaskStatus = (id, completed) => {
 };
 
 // UPDATE (Edit Task Details)
+
+// UPDATE (Edit Task Details)
 export const updateTask = (id, updatedData) => {
   return updateDoc(doc(db, "tasks", id), {
     title: updatedData.title,
     subject: updatedData.subject,
-    priority: updatedData.priority
+    priority: updatedData.priority,
+    dueDate: updatedData.dueDate || ""
   });
 };

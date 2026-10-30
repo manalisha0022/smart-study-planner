@@ -27,6 +27,7 @@ function Dashboard() {
   const [editTitle, setEditTitle] = useState("");
   const [editSubject, setEditSubject] = useState("");
   const [editPriority, setEditPriority] = useState("Medium");
+  const [editDueDate, setEditDueDate] = useState("");
   const [editError, setEditError] = useState("");
 
   // Load tasks when dashboard opens
@@ -66,13 +67,14 @@ function Dashboard() {
   };
 
   // Open edit form
-  const handleEditTask = (task) => {
-    setEditingTask(task);
-    setEditTitle(task.title || "");
-    setEditSubject(task.subject || "");
-    setEditPriority(task.priority || "Medium");
-    setEditError("");
-  };
+const handleEditTask = (task) => {
+  setEditingTask(task);
+  setEditTitle(task.title || "");
+  setEditSubject(task.subject || "");
+  setEditPriority(task.priority || "Medium");
+  setEditDueDate(task.dueDate || "");
+  setEditError("");
+};
 
   // Save edited task
   const handleSaveEdit = async (event) => {
@@ -87,10 +89,11 @@ function Dashboard() {
     }
 
     try {
-      await updateTask(editingTask.id, {
+          await updateTask(editingTask.id, {
         title,
         subject,
         priority: editPriority,
+        dueDate: editDueDate,
       });
 
       setEditingTask(null);
@@ -137,6 +140,10 @@ const filteredTasks = tasks.filter((task) => {
 
   const pendingTasks = tasks.filter((task) => !task.completed).length;
 
+  const completionPercentage =
+  tasks.length === 0
+    ? 0
+    : Math.round((completedTasks / tasks.length) * 100);
   return (
     <div className="dashboard">
       {/* Sidebar */}
@@ -192,6 +199,26 @@ const filteredTasks = tasks.filter((task) => {
           </div>
         </div>
 
+        
+<div className="progress-card">
+  <h2>Study Progress</h2>
+
+  <div className="progress-info">
+    <span>{completionPercentage}% Completed</span>
+    <span>
+      {completedTasks} of {tasks.length} tasks
+    </span>
+  </div>
+
+  <div className="progress-bar">
+    <div
+      className="progress-fill"
+      style={{ width: `${completionPercentage}%` }}
+    ></div>
+  </div>
+</div>
+
+
         {/* Add Task */}
         <TaskForm onAddTask={handleAddTask} />
 
@@ -229,6 +256,14 @@ const filteredTasks = tasks.filter((task) => {
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
               </select>
+
+              <label htmlFor="edit-due-date">Due Date</label>
+              <input
+                id="edit-due-date"
+                type="date"
+                value={editDueDate}
+                onChange={(event) => setEditDueDate(event.target.value)}
+              />
 
               {editError && <p role="alert">{editError}</p>}
 
